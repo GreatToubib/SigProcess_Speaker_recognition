@@ -2,7 +2,7 @@ from preprocess import framing
 from scipy import signal
 import numpy as np
 import matplotlib.pyplot as plt
-"""from scikits.talkbox import lpc"""
+import lpc
 
 def hpfilter(fs,x): 
     #butter filter 
@@ -12,19 +12,20 @@ def hpfilter(fs,x):
     print (b,a)
     xfiltered= signal.lfilter(b, a, x, axis=-1, zi=None) #apply filter to a signal
     
-    plt.figure()
+    """plt.figure()
     plt.plot(xfiltered)
     plt.title("buttera")
-    plt.show()
+    plt.show()"""
     return xfiltered
 
-def hpfilter2(fs,x):
+def hpfilter2(fs,x,a):
     #https://stackoverflow.com/questions/25107806/estimate-formants-using-lpc-in-python
-    xfiltered=signal.lfilter([1., -0.67], [1.], x)
-    plt.figure()
+    
+    xfiltered=signal.lfilter([1., a], [1.], x)
+    """plt.figure()
     plt.plot(x)
     plt.title("hp")
-    plt.show()
+    plt.show()"""
     return xfiltered
 
 def preEmphasis(fs,x,a):
@@ -36,37 +37,41 @@ def preEmphasis(fs,x,a):
         temp[i-1]=x[i]-a*x[i-1]
         i=i+1
         
-    plt.figure()
+    """plt.figure()
     plt.plot(temp)
     plt.title("emphasized")
-    plt.show()
+    plt.show()"""
     
     return temp
 
 def formant(fs,x):
-    print("Formants")
     FL=np.asarray(framing(fs,x,30,15))
-    a=0.63 #0,63 for pre emphasis
+    #a=0.63 #0,63 for pre emphasis
     i=0
-    print(type(FL[i]))
+    a=-0.67
     while i < len(FL):
-        FL[i]=preEmphasis(fs, FL[i], a) # or other hp filter option ?
+        FL[i]=hpfilter2(fs, FL[i],a) # or other hp filter option ?
         w=signal.hamming(len(FL[i]))
-        FL[i]= FL[i]*np.diag(w)
-        """FL[i], e, k=lpc(FL[i],(2+fs/1000), axis=-1)"""
+        FL[i]= w*FL[i]
+        FL[i]=lpc.lpc_ref(FL[i],int(2+fs/1000))
         
         """a : array-like
             the solution of the inversion.
         e : array-like
             the prediction error.
         k : array-like
-            reflection coefficients.
+            reflection coefficients."""
         
-        FL[i]=np.roots(FL[i]) #roots of the lpc's => the formants"""
+        rts=np.roots(FL[i]) #roots of the lpc's => the formants
+        rts = [r for r in rts if np.imag(r) >= 0]
+        angz = np.arctan2(np.imag(rts), np.real(rts))
+        frqs = sorted(angz * (fs / (2 * np.pi)))
+        FL[i]=frqs
         i=i+1
+    return FL
         
-        
-        """
+    
+    """
         # Get LPC.
     A, e, k = lpc(x1, 8)
 

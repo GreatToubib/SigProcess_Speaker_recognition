@@ -8,8 +8,9 @@ from scipy.io.wavfile import read
 import matplotlib.pyplot as plt
 import os, random
 from pitchEstimate import autocorrBasedpitch,cepstrumBasedPitch
-from formants import formant,hpfilter, hpfilter2, preEmphasis
+from formants import formant
 from mfccs import mfccs
+from energy import energy
 
 
 def wavread(x):
@@ -24,16 +25,20 @@ def wavread(x):
     plt.show()
     return fs, x1
 
+def features(fs,x):
+    PitchA=autocorrBasedpitch(fs,x)
+    PitchC=cepstrumBasedPitch(fs,x)
+    Formants=formant(fs,x)
+    Mfccs=mfccs(fs,x)
+    Energy=energy(x)
+    
+    return Energy, PitchA, PitchC, Formants, Mfccs
+
 def main():
     fs, x = wavread("arctic_a0001.wav")
-    #autocorrBasedpitch(fs,x)
-    #cepstrumBasedPitch(fs,x)
-    #formant(fs,x)
-    #hpfilter(fs,x)
-    #hpfilter2(fs,x)
-    #a=0.67
-    #preEmphasis(fs,x,a)
-    mfccs(fs,x)
+    Energy, PitchA, PitchC, Formants, Mfccs=features(fs,x)
+    
+    
     
     """ 
     i=0    

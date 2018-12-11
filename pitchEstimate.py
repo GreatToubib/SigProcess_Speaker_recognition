@@ -22,7 +22,6 @@ def estimateF0(xFrame,fs):
     return F0
 
 def autocorrBasedpitch(fs,x):
-    print("acBasedPitch")
     x=normalize(x)
     FL=np.asarray(framing(fs,x,30,15))
     E=[]
@@ -39,19 +38,21 @@ def autocorrBasedpitch(fs,x):
             VorU.append(0) # unvoiced
             F0s.append(0)
             
-    plt.figure()
-    plt.subplot(3,1,1)
+    """plt.figure()
+    plt.subplot(2,1,1)
     plt.plot(E) # energie 
     plt.title("Energie par Frame")
     plt.show()
-    plt.subplot(3,1,2)
+    plt.subplot(2,1,2)
     plt.plot(VorU) # voiced or unvoiced
     plt.title("Voiced/unvoiced frame?")
     plt.show()
-    plt.subplot(3,1,3)
+    plt.figure()
     plt.plot(F0s) # frequences fondamentales
-    plt.title("fréquences fondamentales par frame")
-    plt.show()
+    plt.title("fréquences fondamentales par frame: autocorr")
+    plt.show()"""
+    return F0s        
+    
     
 def SestimateF0(xFrame,fs):
     F0=0
@@ -60,8 +61,6 @@ def SestimateF0(xFrame,fs):
     h=np.fft.ifft(20 * np.log10(abs(h)))# The frequency response, as complex numbers.
     """h=20 * np.log10(abs(h)) """ #spectrum
     f=w*fs/(2*np.pi) 
-    plt.figure()
-    plt.plot(h)
     
     peaks, _=signal.find_peaks(h)
     #on est dans un domaine temporel
@@ -73,7 +72,6 @@ def SestimateF0(xFrame,fs):
     return F0
 
 def cepstrumBasedPitch(fs,x):
-    print("CepsBasedPitch")
     x=normalize(x)
     FL=framing(fs,x,30,15)
     E=[]
@@ -83,23 +81,19 @@ def cepstrumBasedPitch(fs,x):
     for i in range (0,len(FL)):
         Ef=energy(FL[i])
         E.append(Ef)
+        """w=signal.hamming(len(FL[i]))
+        FL[i]= w*FL[i]"""
         if Ef > threshold:
             VorU.append(1) # voiced
             F0s.append(SestimateF0(FL[i],fs))
         else:
             VorU.append(0) # unvoiced
             F0s.append(0)
-      
-    plt.figure()
-    plt.subplot(3,1,1)
-    """plt.plot(E) # energie 
-    plt.title("Energie par Frame")
-    plt.show()
-    plt.subplot(3,1,2)
-    plt.plot(VorU) # voiced or unvoiced
-    plt.title("Voiced/unvoiced frame?")
-    plt.show()
-    plt.subplot(3,1,3)"""
+    
+    """plt.figure()
     plt.plot(F0s) # frequences fondamentales
-    plt.title("fréquences fondamentales par frame")
-    plt.show()
+    plt.title("fréquences fondamentales par frame: cepstrum")
+    plt.show()"""
+      
+    return F0s  
+    
