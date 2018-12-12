@@ -25,21 +25,22 @@ def calculatePowerSpectrumFrames(FL):
 def mfccs(fs,x):
     a=0.97 # a for mfcc
     x=hpfilter2(fs,x,a)
-    FL=np.asarray(framing(fs,x,30,15))
+    FL=framing(fs,x,30,15)
     
     FL=framesHamming(FL)
     
-    PowerSpectFrames=calculatePowerSpectrumFrames(FL)
-    i=0 
-    FiltBankValues=np.zeros(len(FL))
-    #MFCCsVectors=np.zeros(len(FL))
-    while i < len(PowerSpectFrames): 
-        
-        FiltBankValues[i]=filter_banks(PowerSpectFrames[i], fs, nfilt=40, NFFT=512)
-        """MFCCsVectors[i]=dct(FiltBankValues[i], type=2, axis=1, norm='ortho')"""
-        i=i+1
-    # 7. of the obtaines vector, only the first 13 elements are kept
+    powF=calculatePowerSpectrumFrames(FL)
+    #print("dimensions de powF:",powF.shape)
     
-    return PowerSpectFrames
+    FBValues=filter_banks(powF, fs, nfilt=40, NFFT=958)
+    #print("dimensions de FBV:",FBValues.shape)
+    
+    MFCCstemp=dct(FBValues, type=2, axis=1, norm='ortho')
+    #print("dimensions de MFCCs:",MFCCstemp.shape) 
+    
+    MFCCs=MFCCstemp[:,0:13]
+    #print("dimensions de MFCCs:",MFCCs.shape) #of the obtained vectors, only the first 13 elements are kept
+    
+    return MFCCs
     
     
