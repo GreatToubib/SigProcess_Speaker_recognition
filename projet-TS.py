@@ -11,6 +11,7 @@ from pitchEstimate import autocorrBasedpitch,cepstrumBasedPitch
 from formants import formant
 from mfccs import mfccs
 from energy import energy
+from preprocess import framing,framing2
 
 
 def wavread(x):
@@ -28,29 +29,27 @@ def wavread(x):
 def features(fs,x):
     PitchA=autocorrBasedpitch(fs,x)
     PitchC=cepstrumBasedPitch(fs,x)
-    Formants=formant(fs,x)
     Mfccs=mfccs(fs,x)
+    Formants=formant(fs,x)
     Energy=energy(x)
     
     return Energy, PitchA, PitchC, Formants, Mfccs
 
 def main():
-    fs, x = wavread("arctic_a0001.wav")
+    """fs, x = wavread("arctic_a0001.wav")
     Energy, PitchA, PitchC, Formants, Mfccs=features(fs,x)
+    print(Energy.shape, PitchA.shape, PitchC.shape, Formants.shape, Mfccs.shape)"""
     
-    
-    
-    """ 
     i=0    
-    n=1 #nbre de fichiers
+    n=15 #nbre de fichiers
     while(i<n): 
         file=random.choice(os.listdir("male"))
     
         fs, x = wavread(file)
-        autocorrBasedpitch(fs,x)
-        cepstrumBasedPitch(x)
+        Energy, PitchA, PitchC, Formants, Mfccs=features(fs,x)
+        print(Energy.shape, PitchA.shape, PitchC.shape, Formants.shape, Mfccs.shape)
         i=i+1
-    """
+    
 
 if __name__ == "__main__":
     main()

@@ -18,7 +18,7 @@ def estimateF0(xFrame,fs):
     if(np.size(peaks) != 1):
         F0=(peaks[middleIndex+1]-peaks[middleIndex])
         """ peaks donne les positions des peaks ! donc position milieu +1 - position du milieu = f0 """
-
+        
     return F0
 
 def autocorrBasedpitch(fs,x):
@@ -37,7 +37,7 @@ def autocorrBasedpitch(fs,x):
         else:
             VorU.append(0) # unvoiced
             F0s.append(0)
-            
+    F0s=np.asarray(F0s)        
     """plt.figure()
     plt.subplot(2,1,1)
     plt.plot(E) # energie 
@@ -89,7 +89,7 @@ def cepstrumBasedPitch(fs,x):
         else:
             VorU.append(0) # unvoiced
             F0s.append(0)
-    
+    F0s=np.asarray(F0s)   
     """plt.figure()
     plt.plot(F0s) # frequences fondamentales
     plt.title("fréquences fondamentales par frame: cepstrum")

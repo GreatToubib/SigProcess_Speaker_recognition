@@ -1,8 +1,8 @@
-from preprocess import framing
+from preprocess import framing2,framing
 from scipy import signal
 import numpy as np
 import matplotlib.pyplot as plt
-import lpc
+from lpc import lpc_ref as lpc
 
 def hpfilter(fs,x): 
     #butter filter 
@@ -45,22 +45,17 @@ def preEmphasis(fs,x,a):
     return temp
 
 def formant(fs,x):
-    FL=np.asarray(framing(fs,x,30,15))
-    #a=0.63 #0,63 for pre emphasis
+    FL=np.asarray(framing2(fs,x,30,15))
+    #a=0.63 for pre emphasis
+    #shape FL ( 215 x 480)
     i=0
     a=-0.67
     while i < len(FL):
         FL[i]=hpfilter2(fs, FL[i],a) # or other hp filter option ?
         w=signal.hamming(len(FL[i]))
         FL[i]= w*FL[i]
-        FL[i]=lpc.lpc_ref(FL[i],int(2+fs/1000))
+        FL[i]=lpc(FL[i],int(2+fs/1000))
         
-        """a : array-like
-            the solution of the inversion.
-        e : array-like
-            the prediction error.
-        k : array-like
-            reflection coefficients."""
         
         rts=np.roots(FL[i]) #roots of the lpc's => the formants
         rts = [r for r in rts if np.imag(r) >= 0]
@@ -68,6 +63,7 @@ def formant(fs,x):
         frqs = sorted(angz * (fs / (2 * np.pi)))
         FL[i]=frqs
         i=i+1
+    FL=FL[:-1] 
     return FL
         
     
