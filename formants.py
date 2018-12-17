@@ -28,7 +28,7 @@ def hpfilter2(fs,x,a):
     plt.show()"""
     return xfiltered
 
-def preEmphasis(fs,x,a):
+def preEmphasis(x,a):
     #simple application de la formule Formants, point 2.
     temp=np.zeros(len(x))
     
@@ -44,14 +44,22 @@ def preEmphasis(fs,x,a):
     
     return temp
 
+def preemphasis2(signal, coeff=0.95):
+    """perform preemphasis on the input signal.
+    :param signal: The signal to filter.
+    :param coeff: The preemphasis coefficient. 0 is no filter, default is 0.95.
+    :returns: the filtered signal.
+    """
+    return np.append(signal[0], signal[1:] - coeff * signal[:-1])
+
 def formant(fs,x):
-    FL=np.asarray(framing2(fs,x,30,15))
+    FL=np.asarray(framing2(fs,x))
     #a=0.63 for pre emphasis
     #shape FL ( 215 x 480)
     i=0
     a=-0.67
     while i < len(FL):
-        FL[i]=hpfilter2(fs, FL[i],a) # or other hp filter option ?
+        FL[i]=preEmphasis(FL[i],a) # or other hp filter option ?
         w=signal.hamming(len(FL[i]))
         FL[i]= w*FL[i]
         FL[i]=lpc(FL[i],int(2+fs/1000))

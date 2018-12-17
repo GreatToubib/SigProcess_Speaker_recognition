@@ -1,6 +1,6 @@
 from preprocess import framing
 import numpy as np
-from formants import hpfilter2
+from formants import hpfilter2, preEmphasis, preemphasis2
 import matplotlib.pyplot as plt
 from scipy import signal
 from scipy.fftpack import dct
@@ -24,16 +24,23 @@ def calculatePowerSpectrumFrames(FL):
     
 def mfccs(fs,x):
     a=0.97 # a for mfcc
-    x=hpfilter2(fs,x,a)
-    FL=framing(fs,x,30,15)
+    x=preemphasis2(x,a)
+    FL=framing(fs,x)
     
     FL=framesHamming(FL)
     
     powF=calculatePowerSpectrumFrames(FL)
     #print("dimensions de powF:",powF.shape)
     
-    FBValues=filter_banks(powF, fs, nfilt=40, NFFT=958)
+    temp=(len(FL[0])*2)-1
+    FBValues=filter_banks(powF, fs, nfilt=26 , NFFT=temp)
     #print("dimensions de FBV:",FBValues.shape)
+    
+    """i=0
+    while i < len(FBValues):
+        FBValues[i] = np.where(FBValues[i] == 0,np.finfo(float).eps,FBValues[i])
+        FBValues[i]=np.log(FBValues[i])
+        i=i+1"""
     
     MFCCstemp=dct(FBValues, type=2, axis=1, norm='ortho')
     #print("dimensions de MFCCs:",MFCCstemp.shape) 

@@ -23,7 +23,7 @@ def estimateF0(xFrame,fs):
 
 def autocorrBasedpitch(fs,x):
     x=normalize(x)
-    FL=np.asarray(framing(fs,x,30,15))
+    FL=np.asarray(framing(fs,x))
     E=[]
     VorU= [] #voice or unvoiced frame?
     F0s=[]
@@ -73,7 +73,7 @@ def SestimateF0(xFrame,fs):
 
 def cepstrumBasedPitch(fs,x):
     x=normalize(x)
-    FL=framing(fs,x,30,15)
+    FL=framing(fs,x)
     E=[]
     VorU= [] #voice or unvoiced frame?
     F0s=[]
