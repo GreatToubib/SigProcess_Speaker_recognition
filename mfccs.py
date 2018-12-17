@@ -19,7 +19,13 @@ def calculatePowerSpectrumFrames(FL):
     NTFD=512
     while i < len(FL):
         FL[i]=(np.square(np.abs(np.fft.fft(FL[i]))))/NTFD
+        FL[i] = np.where(FL[i] == 0,np.finfo(float).eps,FL[i])
+        """plt.figure()
+        plt.plot(FL[i])
+        plt.show()"""
+        """FL[i]=np.log(FL[i])"""
         i=i+1
+        
     return FL
     
 def mfccs(fs,x):

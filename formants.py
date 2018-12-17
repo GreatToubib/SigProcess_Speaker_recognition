@@ -53,7 +53,7 @@ def preemphasis2(signal, coeff=0.95):
     return np.append(signal[0], signal[1:] - coeff * signal[:-1])
 
 def formant(fs,x):
-    FL=np.asarray(framing2(fs,x))
+    FL=framing2(fs,x)
     #a=0.63 for pre emphasis
     #shape FL ( 215 x 480)
     i=0
@@ -71,7 +71,7 @@ def formant(fs,x):
         frqs = sorted(angz * (fs / (2 * np.pi)))
         FL[i]=frqs
         i=i+1
-    FL=FL[:-1] 
+    FL=FL[:-1]
     return FL
         
     

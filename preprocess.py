@@ -10,27 +10,40 @@ def normalize(x):
     
     return x
 
-def framing(fs,x): # rentrée en ms
+def framing(fs,sig): # rentrée en ms
     """ Decoupe un signal en frames , arguments: fs la frequence d'echantillonage du signal, x son amplitude, 
     width la largeur en frequence d'une frame et step le pas entre 2 frames. Return le tableau de frames"""
     width=25
     step=10
-    duration = np.size(x) # Nbre d'échantillon du signal 
+    duration = np.size(sig) # Nbre d'échantillon du signal 
     width = math.floor(width*fs/1000) # convertir en nbre d'échantillon, et en integer
     step = math.floor(step*fs/1000) # convertir en nbre d'échantillon, et en integer
     framelist=[]
     f=0
     l=0
+    
+    if duration <= width:
+        numframes = 1
+    else:
+        numframes = 1 + int(math.ceil((1.0 * duration - width) / step))
+
+    padlen = int((numframes - 1) * step + width)
+
+    zeros = np.zeros((padlen - duration,))
+    sig = np.concatenate((sig, zeros))
+    
     itmax=int(duration/step)-1
     for j in range(0,itmax): #duration, step or just itmax / formants or mfccs
         l=f+width
-        temp=np.asarray(x[f:l])
-        """plt.figure()
-        plt.plot(temp)
-        plt.show()"""
+        temp=np.asarray(sig[f:l])
         framelist.append(temp) # ajoute une frame à la liste
         f=f+step
     framelist=np.asarray(framelist)
+    """plt.figure()
+    plt.plot(framelist[321])
+    plt.title("fr1")"""
+    
+    plt.show()
     """print("framelist shape: ",framelist.shape)"""
     return framelist
 
@@ -49,12 +62,13 @@ def framing2(fs,x): # rentrée en ms
     for j in range(0,duration,step): #duration, step or just itmax / formants or mfccs
         l=f+width
         temp=np.asarray(x[f:l])
-        """plt.figure()
-        plt.plot(temp)
-        plt.show()"""
         framelist.append(temp) # ajoute une frame à la liste
         f=f+step
     del framelist[-1]
+    """plt.figure()
+    plt.plot(framelist[321])
+    plt.title("fr2")
+    plt.show()"""
     framelist=np.asarray(framelist)
     
     """print("framelist shape: ",framelist.shape)"""

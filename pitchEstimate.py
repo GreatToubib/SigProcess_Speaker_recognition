@@ -23,7 +23,7 @@ def estimateF0(xFrame,fs):
 
 def autocorrBasedpitch(fs,x):
     x=normalize(x)
-    FL=np.asarray(framing(fs,x))
+    FL=framing(fs,x)
     E=[]
     VorU= [] #voice or unvoiced frame?
     F0s=[]
@@ -59,12 +59,10 @@ def SestimateF0(xFrame,fs):
     
     w, h = signal.freqz(xFrame)
     h=np.fft.ifft(20 * np.log10(abs(h)))# The frequency response, as complex numbers.
-    """h=20 * np.log10(abs(h)) """ #spectrum
-    f=w*fs/(2*np.pi) 
     
     peaks, _=signal.find_peaks(h)
-    #on est dans un domaine temporel
     peaksvalues=[]
+    
     for i in range (10,len(peaks)-10,1):
        peaksvalues.append(h[i]) 
 
@@ -81,8 +79,8 @@ def cepstrumBasedPitch(fs,x):
     for i in range (0,len(FL)):
         Ef=energy(FL[i])
         E.append(Ef)
-        """w=signal.hamming(len(FL[i]))
-        FL[i]= w*FL[i]"""
+        w=signal.hamming(len(FL[i]))
+        FL[i]= w*FL[i]
         if Ef > threshold:
             VorU.append(1) # voiced
             F0s.append(SestimateF0(FL[i],fs))
