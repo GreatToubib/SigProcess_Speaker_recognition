@@ -1,18 +1,20 @@
 from energy import energy
 from preprocess import normalize,framing
 import numpy as np
-import matplotlib.pyplot as plt
 from scipy import signal
+import matplotlib.pyplot as plt
 
 
 
-def estimateF0(xFrame,fs):
-    #autocorr Based
+def xCorrF0(xFrame,fs):
+    
+    """  returns fundamental frequency of a frame using xcorr
+        arguments: xFrame = one frame of the signal
+                    fs= sampling frequency
+            returns F0: fundamental frequency of the frame"""
     
     F0=0
     lags,c, line, b=plt.xcorr(xFrame, xFrame, normed=True, usevlines=True, maxlags=320) # c = taux de correlation, l'ordonnée. 50Hz => 320
-    plt.title("xcorr empilement")
-    #affichage chelou, ils s'empilent tous?
     peaks, _=signal.find_peaks(c)
     middleIndex = int((np.size(peaks) - 1)/2)
     if(np.size(peaks) != 1):
@@ -21,40 +23,12 @@ def estimateF0(xFrame,fs):
         
     return F0
 
-def autocorrBasedpitch(fs,x):
-    x=normalize(x)
-    FL=framing(fs,x)
-    E=[]
-    VorU= [] #voice or unvoiced frame?
-    F0s=[]
-    threshold = 7
-    for i in range (0,len(FL)):
-        Ef=energy(FL[i])
-        E.append(Ef)
-        if Ef > threshold:
-            VorU.append(1) # voiced
-            F0s.append(estimateF0(FL[i],fs))
-        else:
-            VorU.append(0) # unvoiced
-            F0s.append(0)
-    F0s=np.asarray(F0s)        
-    """plt.figure()
-    plt.subplot(2,1,1)
-    plt.plot(E) # energie 
-    plt.title("Energie par Frame")
-    plt.show()
-    plt.subplot(2,1,2)
-    plt.plot(VorU) # voiced or unvoiced
-    plt.title("Voiced/unvoiced frame?")
-    plt.show()
-    plt.figure()
-    plt.plot(F0s) # frequences fondamentales
-    plt.title("fréquences fondamentales par frame: autocorr")
-    plt.show()"""
-    return F0s        
+def cepstrumF0(xFrame,fs):
     
-    
-def SestimateF0(xFrame,fs):
+    """  returns fundamental frequency of a frame using cepstrum
+         arguments: xFrame = one frame of the signal
+                    fs= sampling frequency
+            returns F0: fundamental frequency of the frame"""
     F0=0
     
     w, h = signal.freqz(xFrame)
@@ -67,31 +41,36 @@ def SestimateF0(xFrame,fs):
        peaksvalues.append(h[i]) 
 
     F0=np.argmax(peaksvalues)
+    
     return F0
 
-def cepstrumBasedPitch(fs,x):
+def findPitch(fs,x,method):
+    """ returns all the fundamental frequencies ( for each frame of the signal )
+    arguments:
+        fs: sampling frequency
+        x : the signal 
+        method: 0 to use autocorrelation, 1 to use cepstrum based algorithm
+    returns: 
+        F0s: array like, contains the fundamental frequency of each frame """
+        
     x=normalize(x)
     FL=framing(fs,x)
-    E=[]
     VorU= [] #voice or unvoiced frame?
-    F0s=[]
-    threshold = 7
+    F0s=[] 
+    threshold = 7 
+    """We observed and listened to 5 random signals. 
+    We noticed that most of voiced sounds gave a corresponding energy superior to 7."""
     for i in range (0,len(FL)):
-        Ef=energy(FL[i])
-        E.append(Ef)
-        w=signal.hamming(len(FL[i]))
-        FL[i]= w*FL[i]
+        Ef=energy(FL[i]) 
+        if method ==1:
+            w=signal.hamming(len(FL[i]))
+            FL[i]= w*FL[i]
         if Ef > threshold:
             VorU.append(1) # voiced
-            F0s.append(SestimateF0(FL[i],fs))
+            if method==0: F0s.append(xCorrF0(FL[i],fs))
+            if method==1: F0s.append(cepstrumF0(FL[i],fs))
         else:
             VorU.append(0) # unvoiced
             F0s.append(0)
-    F0s=np.asarray(F0s)   
-    """plt.figure()
-    plt.plot(F0s) # frequences fondamentales
-    plt.title("fréquences fondamentales par frame: cepstrum")
-    plt.show()"""
-      
-    return F0s  
-    
+    F0s=np.asarray(F0s)        
+    return F0s        
